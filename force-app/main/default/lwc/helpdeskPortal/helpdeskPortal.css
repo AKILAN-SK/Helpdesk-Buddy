@@ -1,0 +1,20 @@
+.tile {
+    background: var(--lwc-colorBackgroundAlt, #f3f3f3);
+}
+
+.tile-high {
+    border-left: 4px solid var(--lwc-colorBorderError, #ea001e);
+}
+
+.form-panel,
+.detail-panel {
+    background: var(--lwc-colorBackgroundAlt, #f3f3f3);
+}
+
+.detail-description {
+    white-space: pre-wrap;
+}
+
+.filter {
+    max-width: 18rem;
+}

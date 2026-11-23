@@ -1,0 +1,104 @@
+<template>
+    <lightning-card title="IT &amp; HR Helpdesk" icon-name="standard:case">
+        <lightning-button slot="actions" label="Refresh" icon-name="utility:refresh" onclick={handleRefresh}></lightning-button>
+        <lightning-button slot="actions" variant="brand" class="slds-m-left_x-small" label={formButtonLabel} onclick={toggleForm}></lightning-button>
+
+        <div class="slds-p-horizontal_medium">
+            <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">
+                <div class="slds-col slds-size_1-of-3">
+                    <div class="tile slds-box slds-box_x-small">
+                        <p class="slds-text-title">Open</p>
+                        <p class="slds-text-heading_medium">{openCount}</p>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <div class="tile tile-high slds-box slds-box_x-small">
+                        <p class="slds-text-title">Open, high priority</p>
+                        <p class="slds-text-heading_medium">{highCount}</p>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-3">
+                    <div class="tile slds-box slds-box_x-small">
+                        <p class="slds-text-title">Closed</p>
+                        <p class="slds-text-heading_medium">{closedCount}</p>
+                    </div>
+                </div>
+            </div>
+
+            
+            <template lwc:if={showForm}>
+                <div class="slds-box slds-m-bottom_medium form-panel">
+                    <h3 class="slds-text-heading_small slds-m-bottom_small">Raise a ticket</h3>
+                    <lightning-input class="ticket-input" data-name="subject" label="Subject" required
+                        max-length="255" value={form.subject} onchange={handleFieldChange}></lightning-input>
+                    <lightning-textarea class="ticket-input" data-name="description" label="What happened, and what have you tried?"
+                        required value={form.description} onchange={handleFieldChange}></lightning-textarea>
+                    <div class="slds-grid slds-gutters_small">
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-combobox class="ticket-input" data-name="category" label="Category" required
+                                options={categoryOptions} value={form.category} onchange={handleFieldChange}></lightning-combobox>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <lightning-combobox class="ticket-input" data-name="priority" label="Priority" required
+                                options={priorityOptions} value={form.priority} onchange={handleFieldChange}
+                                field-level-help="High: you cannot work. Medium: work is slowed. Low: general question."></lightning-combobox>
+                        </div>
+                    </div>
+                    <div class="slds-m-top_small">
+                        <lightning-button variant="brand" label="Submit ticket" onclick={handleSubmit} disabled={isSaving}></lightning-button>
+                        <lightning-button class="slds-m-left_x-small" label="Cancel" onclick={toggleForm} disabled={isSaving}></lightning-button>
+                    </div>
+                </div>
+            </template>
+
+            
+            <lightning-combobox name="statusFilter" label="Show" variant="label-inline"
+                options={filterOptions} value={statusFilter} onchange={handleFilterChange}
+                class="slds-m-bottom_small filter"></lightning-combobox>
+
+            
+            <div class="slds-is-relative">
+                <template lwc:if={isLoading}>
+                    <lightning-spinner alternative-text="Loading tickets" size="small"></lightning-spinner>
+                </template>
+
+                <template lwc:if={error}>
+                    <div class="slds-text-color_error slds-m-vertical_small" role="alert">{error}</div>
+                </template>
+
+                <template lwc:elseif={hasTickets}>
+                    <lightning-datatable key-field="id" data={filteredTickets} columns={columns}
+                        hide-checkbox-column onrowaction={handleRowAction}></lightning-datatable>
+                </template>
+
+                <template lwc:elseif={isLoaded}>
+                    <div class="slds-text-align_center slds-p-vertical_large">
+                        <p class="slds-text-heading_small">No tickets to show</p>
+                        <p class="slds-text-color_weak">Raise a ticket, or ask Helpdesk Buddy in the Agentforce panel.</p>
+                    </div>
+                </template>
+            </div>
+
+            
+            <template lwc:if={selectedTicket}>
+                <div class="slds-box slds-m-vertical_medium detail-panel">
+                    <div class="slds-grid slds-grid_align-spread slds-m-bottom_x-small">
+                        <h3 class="slds-text-heading_small">Ticket {selectedTicket.caseNumber}</h3>
+                        <lightning-button-icon icon-name="utility:close" variant="bare" alternative-text="Close details"
+                            onclick={closeDetails}></lightning-button-icon>
+                    </div>
+                    <p class="slds-text-heading_small slds-m-bottom_x-small">{selectedTicket.subject}</p>
+                    <div class="slds-m-bottom_x-small">
+                        <lightning-badge label={selectedTicket.status}></lightning-badge>
+                        <lightning-badge class="slds-m-left_x-small" label={selectedTicket.priority}></lightning-badge>
+                        <template lwc:if={selectedTicket.category}>
+                            <lightning-badge class="slds-m-left_x-small" label={selectedTicket.category}></lightning-badge>
+                        </template>
+                    </div>
+                    <p class="slds-text-color_weak slds-m-bottom_x-small">Owner: {selectedTicket.ownerName}</p>
+                    <p class="detail-description">{selectedTicket.description}</p>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>
